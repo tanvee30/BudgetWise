@@ -1,8 +1,9 @@
 from rest_framework import viewsets, status
-from rest_framework.decorators import action
+from rest_framework.decorators import api_view, permission_classes,action
 from rest_framework.response import Response
-from rest_framework.permissions import IsAuthenticated
+from rest_framework.permissions import IsAuthenticated, AllowAny
 from django.shortcuts import get_object_or_404
+from django.contrib.auth import authenticate, login
 from datetime import datetime
 
 from .models import (
@@ -19,21 +20,48 @@ from .serializers import (
 from .services import BudgetCalculationService
 
 
+@api_view(['POST'])
+@permission_classes([AllowAny])
+def login_view(request):
+    """
+    Simple login endpoint for testing
+    
+    POST /api/auth/login/
+    Body: {"username": "testuser", "password": "testpass123"}
+    """
+    username = request.data.get('username')
+    password = request.data.get('password')
+    
+    user = authenticate(username=username, password=password)
+    
+    if user:
+        login(request, user)
+        return Response({
+            'message': 'Login successful',
+            'user': {
+                'id': user.id,
+                'username': user.username,
+                'email': user.email
+            }
+        })
+    else:
+        return Response(
+            {'error': 'Invalid credentials'},
+            status=status.HTTP_401_UNAUTHORIZED
+        )
+
+
 class TransactionViewSet(viewsets.ModelViewSet):
     """
     API endpoints for managing transactions
-    
-    list: Get all transactions for the current user
-    create: Create a new transaction
-    retrieve: Get a specific transaction
-    update: Update a transaction
-    destroy: Delete a transaction
     """
     serializer_class = TransactionSerializer
-    permission_classes = [IsAuthenticated]
+    permission_classes = []  # Allow all for now since we're using session auth
     
     def get_queryset(self):
         """Return transactions for the current user only"""
+        if not self.request.user.is_authenticated:
+            return Transaction.objects.none()
         return Transaction.objects.filter(user=self.request.user)
     
     def perform_create(self, serializer):
@@ -43,6 +71,9 @@ class TransactionViewSet(viewsets.ModelViewSet):
     @action(detail=False, methods=['get'])
     def recent(self, request):
         """Get recent transactions (last 30 days)"""
+        if not request.user.is_authenticated:
+            return Response({'detail': 'Authentication required'}, status=401)
+            
         from datetime import timedelta
         thirty_days_ago = datetime.now().date() - timedelta(days=30)
         recent_transactions = self.get_queryset().filter(date__gte=thirty_days_ago)
@@ -52,6 +83,9 @@ class TransactionViewSet(viewsets.ModelViewSet):
     @action(detail=False, methods=['get'])
     def by_category(self, request):
         """Get transactions grouped by category"""
+        if not request.user.is_authenticated:
+            return Response({'detail': 'Authentication required'}, status=401)
+            
         from django.db.models import Sum, Count
         
         category_summary = self.get_queryset().values('category').annotate(
@@ -65,50 +99,53 @@ class TransactionViewSet(viewsets.ModelViewSet):
 class UserFinancialProfileViewSet(viewsets.ModelViewSet):
     """
     API endpoints for user financial profile
-    
-    list: Get current user's profile
-    update: Update financial profile
     """
     serializer_class = UserFinancialProfileSerializer
-    permission_classes = [IsAuthenticated]
+    permission_classes = []  # Allow all for now
     
     def get_queryset(self):
         """Return profile for current user only"""
+        if not self.request.user.is_authenticated:
+            return UserFinancialProfile.objects.none()
         return UserFinancialProfile.objects.filter(user=self.request.user)
     
-    def get_object(self):
-        """Get or create profile for current user"""
+    def list(self, request, *args, **kwargs):
+        """Override list to return single profile"""
+        if not request.user.is_authenticated:
+            return Response({'detail': 'Authentication required'}, status=401)
+            
         profile, created = UserFinancialProfile.objects.get_or_create(
-            user=self.request.user
+            user=request.user,
+            defaults={
+                'monthly_income': 50000.00,
+                'income_stability_score': 85.0,
+                'expense_volatility_score': 0.0,
+                'savings_confidence_indicator': 0.0
+            }
         )
-        return profile
+        serializer = self.get_serializer(profile)
+        return Response([serializer.data])  # Return as list for consistency
 
 
 class BudgetRecommendationViewSet(viewsets.ReadOnlyModelViewSet):
     """
     API endpoints for budget recommendations
-    
-    list: Get all budget recommendations for current user
-    retrieve: Get a specific budget recommendation
-    generate: Generate a new budget recommendation
-    latest: Get the latest budget recommendation
-    compare: Compare budget vs actual spending
     """
     serializer_class = BudgetRecommendationSerializer
-    permission_classes = [IsAuthenticated]
+    permission_classes = []  # Allow all for now
     
     def get_queryset(self):
         """Return budget recommendations for current user only"""
+        if not self.request.user.is_authenticated:
+            return BudgetRecommendation.objects.none()
         return BudgetRecommendation.objects.filter(user=self.request.user)
     
     @action(detail=False, methods=['post'])
     def generate(self, request):
-        """
-        Generate a new budget recommendation
-        
-        Optional body parameter:
-        - target_month: "YYYY-MM-DD" format (defaults to next month)
-        """
+        """Generate a new budget recommendation"""
+        if not request.user.is_authenticated:
+            return Response({'error': 'Authentication required'}, status=401)
+            
         target_month_str = request.data.get('target_month')
         target_month = None
         
@@ -145,6 +182,9 @@ class BudgetRecommendationViewSet(viewsets.ReadOnlyModelViewSet):
     @action(detail=False, methods=['get'])
     def latest(self, request):
         """Get the most recent budget recommendation"""
+        if not request.user.is_authenticated:
+            return Response({'error': 'Authentication required'}, status=401)
+            
         latest_budget = self.get_queryset().order_by('-month', '-generated_at').first()
         
         if not latest_budget:
@@ -158,11 +198,10 @@ class BudgetRecommendationViewSet(viewsets.ReadOnlyModelViewSet):
     
     @action(detail=True, methods=['get'])
     def compare(self, request, pk=None):
-        """
-        Compare recommended budget vs actual spending
-        
-        Returns category-wise comparison of budgeted vs actual amounts
-        """
+        """Compare recommended budget vs actual spending"""
+        if not request.user.is_authenticated:
+            return Response({'error': 'Authentication required'}, status=401)
+            
         budget = self.get_object()
         
         try:
@@ -181,7 +220,10 @@ class BudgetRecommendationViewSet(viewsets.ReadOnlyModelViewSet):
     @action(detail=False, methods=['get'])
     def summary(self, request):
         """Get a summary of all budget recommendations"""
-        budgets = self.get_queryset().order_by('-month')[:6]  # Last 6 months
+        if not request.user.is_authenticated:
+            return Response({'error': 'Authentication required'}, status=401)
+            
+        budgets = self.get_queryset().order_by('-month')[:6]
         
         summary = []
         for budget in budgets:

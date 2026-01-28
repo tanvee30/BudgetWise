@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}BudgetWise{% endblock %}</title>
+    <link rel="stylesheet" href="/static/css/style.css?v=2">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    {% if user.is_authenticated %}
+    <nav class="navbar">
+        <div class="nav-container">
+            <a href="{% url 'home' %}" class="nav-brand">💰 BudgetWise</a>
+            <ul class="nav-links">
+                <li><a href="{% url 'dashboard' %}">Dashboard</a></li>
+                <li><a href="{% url 'transactions' %}">Transactions</a></li>
+                <li><a href="{% url 'budget' %}">Budget</a></li>
+                <li>
+                    <span style="color: var(--text-secondary); margin-right: 1rem;">
+                        👤 {{ user.username }}
+                    </span>
+                </li>
+                <li><a href="{% url 'logout' %}" class="btn btn-secondary" style="padding: 0.5rem 1rem;">Logout</a></li>
+            </ul>
+        </div>
+    </nav>
+    {% endif %}
+
+    <div class="container">
+        {% block content %}{% endblock %}
+    </div>
+
+    {% block scripts %}{% endblock %}
+</body>
+</html>

@@ -1,0 +1,49 @@
+{% extends 'base.html' %}
+
+{% block title %}Dashboard - BudgetWise{% endblock %}
+
+{% block content %}
+<h1 style="margin-bottom: 2rem;">📊 Dashboard</h1>
+
+<!-- Add this test button -->
+<div style="margin-bottom: 1rem;">
+    <button onclick="testAPIs()" class="btn btn-secondary">🔍 Test APIs</button>
+</div>
+
+<div class="stats-grid" id="statsGrid">
+    <div class="loading">
+        <div class="spinner"></div>
+        <p>Loading dashboard...</p>
+    </div>
+</div>
+
+<div class="card" id="latestBudgetCard" style="display: none;">
+    <div class="card-header">
+        <h2 class="card-title">Latest Budget Recommendation</h2>
+        <button onclick="generateNewBudget()" class="btn btn-primary">Generate New Budget</button>
+    </div>
+    <div id="budgetContent"></div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+// Test function
+async function testAPIs() {
+    console.log('Testing APIs...');
+    
+    // Test profile
+    try {
+        const res = await fetch('/api/profile/');
+        console.log('Profile status:', res.status);
+        const data = await res.json();
+        console.log('Profile data:', data);
+        alert('✅ Profile API works! Check console.');
+    } catch (error) {
+        console.error('Profile error:', error);
+        alert('❌ Profile API failed! Check console.');
+    }
+}
+</script>
+<script src="/static/js/dashboard.js?v=3"></script>
+{% endblock %}
