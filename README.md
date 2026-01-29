@@ -1,4 +1,4 @@
-# BudgetWise
+
 # 💰 BudgetWise - Intelligent Budget Recommendation Engine
 
 An AI-powered personal finance platform that generates realistic, personalized budget recommendations by analyzing historical transaction data and spending patterns.
@@ -8,17 +8,17 @@ An AI-powered personal finance platform that generates realistic, personalized b
 
  📋 Table of Contents
 
-- [Overview](#overview)
-- [Key Features](#key-features)
-- [Tech Stack](#tech-stack)
-- [Installation & Setup](#installation--setup)
-- [Usage Guide](#usage-guide)
-- [API Documentation](#api-documentation)
-- [Project Structure](#project-structure)
-- [Budget Calculation Logic](#budget-calculation-logic)
-- [Enhancements Beyond Requirements](#enhancements-beyond-requirements)
-- [Testing](#testing)
-- [Future Improvements](#future-improvements)
+- [Overview]
+- [Key Features]
+- [Tech Stack]
+- [Installation & Setup]
+- [Usage Guide]
+- [API Documentation]
+- [Project Structure]
+- [Budget Calculation Logic]
+- [Enhancements Beyond Requirements]
+- [Testing]
+- [Future Improvements]
 
 
 🎯 Overview
@@ -81,7 +81,7 @@ Thoughtfully handles:
 - Budget vs Actual Comparison**: Side-by-side bar chart
 - Built with Chart.js for smooth, interactive experience
 
-#### 8. **Budget Adherence Score** 🎯
+8.Budget Adherence Score 🎯
 - Real-time score (0-100) showing how well you're following your budget
 - Color-coded visual gauge (green/yellow/red)
 - Category-specific insights and warnings
@@ -143,7 +143,7 @@ Prerequisites
 
 Step 1: Clone Repository
 ```bash
-git clone https://github.com/yourusername/BudgetWise.git
+git clone https://github.com/tanvee30/BudgetWise
 cd BudgetWise
 ```
 
@@ -268,17 +268,17 @@ Endpoints
 
 1.User Financial Profile
 
-GET  /api/profile/
-json
-Response:
-[{
+GET /api/profile/
+[
+  {
     "id": 1,
     "username": "testuser",
     "monthly_income": "50000.00",
     "income_stability_score": 85.0,
     "expense_volatility_score": 36.4,
     "savings_confidence_indicator": 53.1
-}]
+  }
+]
 
 PUT /api/profile/{id}/
 json
@@ -481,9 +481,9 @@ python manage.py test_budget
 👨‍💻 Developer
 
 Tanvee Saxena
-- GitHub: 
+- GitHub:https://github.com/tanvee30
 - Email: tanveesaxena30@gmail.com
-- LinkedIn:
+- LinkedIn:https://www.linkedin.com/in/tanvee-saxena-74a001282/
 
 
 
