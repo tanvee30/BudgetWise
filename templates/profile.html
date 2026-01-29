@@ -1,0 +1,118 @@
+{% extends "base.html" %}
+{% block title %}Profile | BudgetWise{% endblock %}
+
+{% block content %}
+<div style="max-width: 900px; margin: 0 auto; padding: 2rem 0;">
+    
+    <div style="display: flex; align-items: center; justify-content: space-between; gap: 1rem; flex-wrap: wrap;">
+        <div>
+            <h1 style="font-size: 2rem; font-weight: 700; margin-bottom: 0.25rem;">👤 Your Profile</h1>
+            <p style="color: #6b7280; margin: 0;">Manage your account details</p>
+        </div>
+
+        <a href="/dashboard/" class="btn btn-secondary" style="text-decoration: none;">
+            ← Back to Dashboard
+        </a>
+    </div>
+
+    <div style="margin-top: 2rem; display: grid; grid-template-columns: 1fr; gap: 1.5rem;">
+        
+        <!-- Profile Card -->
+        <div style="background: white; border-radius: 16px; padding: 1.5rem; box-shadow: 0 10px 25px rgba(0,0,0,0.06); border: 1px solid rgba(0,0,0,0.06);">
+            
+            <div style="display: flex; align-items: center; gap: 1rem; flex-wrap: wrap;">
+                
+                <!-- Avatar -->
+                <div style="width: 70px; height: 70px; background: linear-gradient(135deg, #667eea, #764ba2); border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; font-weight: 700; font-size: 1.5rem;">
+                    {{ user.username.0|upper }}
+                </div>
+
+                <!-- Basic Info -->
+                <div style="flex: 1;">
+                    <h2 style="margin: 0; font-size: 1.25rem; font-weight: 700;">
+                        {{ user.username }}
+                    </h2>
+                    <p style="margin: 0.25rem 0 0; color: #6b7280;">
+                        Logged in user details
+                    </p>
+                </div>
+            </div>
+
+            <hr style="margin: 1.5rem 0; border: none; border-top: 1px solid rgba(0,0,0,0.08);">
+
+            <!-- Details Grid -->
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+                
+                <div style="padding: 1rem; border-radius: 12px; background: #f9fafb; border: 1px solid rgba(0,0,0,0.05);">
+                    <p style="margin: 0; font-size: 0.85rem; color: #6b7280;">Username</p>
+                    <p style="margin: 0.35rem 0 0; font-weight: 600; color: #111827;">
+                        {{ user.username }}
+                    </p>
+                </div>
+
+                <div style="padding: 1rem; border-radius: 12px; background: #f9fafb; border: 1px solid rgba(0,0,0,0.05);">
+                    <p style="margin: 0; font-size: 0.85rem; color: #6b7280;">Email</p>
+                    <p style="margin: 0.35rem 0 0; font-weight: 600; color: #111827;">
+                        {% if user.email %}
+                            {{ user.email }}
+                        {% else %}
+                            Not provided
+                        {% endif %}
+                    </p>
+                </div>
+
+                <div style="padding: 1rem; border-radius: 12px; background: #f9fafb; border: 1px solid rgba(0,0,0,0.05);">
+                    <p style="margin: 0; font-size: 0.85rem; color: #6b7280;">Full Name</p>
+                    <p style="margin: 0.35rem 0 0; font-weight: 600; color: #111827;">
+                        {% if user.first_name or user.last_name %}
+                            {{ user.first_name }} {{ user.last_name }}
+                        {% else %}
+                            Not set
+                        {% endif %}
+                    </p>
+                </div>
+
+                <div style="padding: 1rem; border-radius: 12px; background: #f9fafb; border: 1px solid rgba(0,0,0,0.05);">
+                    <p style="margin: 0; font-size: 0.85rem; color: #6b7280;">Joined On</p>
+                    <p style="margin: 0.35rem 0 0; font-weight: 600; color: #111827;">
+                        {{ user.date_joined|date:"d M Y" }}
+                    </p>
+                </div>
+
+                <div style="padding: 1rem; border-radius: 12px; background: #f9fafb; border: 1px solid rgba(0,0,0,0.05);">
+                    <p style="margin: 0; font-size: 0.85rem; color: #6b7280;">Last Login</p>
+                    <p style="margin: 0.35rem 0 0; font-weight: 600; color: #111827;">
+                        {% if user.last_login %}
+                            {{ user.last_login|date:"d M Y, h:i A" }}
+                        {% else %}
+                            Not available
+                        {% endif %}
+                    </p>
+                </div>
+
+                <div style="padding: 1rem; border-radius: 12px; background: #f9fafb; border: 1px solid rgba(0,0,0,0.05);">
+                    <p style="margin: 0; font-size: 0.85rem; color: #6b7280;">Account Status</p>
+                    <p style="margin: 0.35rem 0 0; font-weight: 700;">
+                        {% if user.is_active %}
+                            <span style="color: #16a34a;">Active</span>
+                        {% else %}
+                            <span style="color: #dc2626;">Inactive</span>
+                        {% endif %}
+                    </p>
+                </div>
+
+            </div>
+
+            <div style="margin-top: 1.5rem; display: flex; gap: 1rem; flex-wrap: wrap;">
+                <a href="/logout/" class="btn btn-secondary" style="text-decoration: none;">
+                    Logout
+                </a>
+            </div>
+
+        </div>
+
+        
+
+    </div>
+</div>
+{% endblock %}

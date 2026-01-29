@@ -1,0 +1,63 @@
+{% extends 'base.html' %}
+
+{% block title %}Dashboard - BudgetWise{% endblock %}
+
+{% block content %}
+<h1 style="margin-bottom: 2rem;">📊 Dashboard</h1>
+
+<!-- Stats Grid -->
+<div class="stats-grid" id="statsGrid">
+    <div class="loading">
+        <div class="spinner"></div>
+        <p>Loading dashboard...</p>
+    </div>
+</div>
+<!-- Budget Adherence Score -->
+<div class="card" id="adherenceCard" style="display: none; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white;">
+    <div class="card-header" style="border-bottom: 1px solid rgba(255,255,255,0.2);">
+        <h3 class="card-title" style="color: white;">🎯 Budget Adherence Score</h3>
+    </div>
+    <div id="adherenceContent"></div>
+</div>
+
+<!-- Charts Section -->
+<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(400px, 1fr)); gap: 1.5rem; margin: 2rem 0;">
+    <!-- Spending by Category Chart -->
+    <div class="card">
+        <div class="card-header">
+            <h3 class="card-title">📊 Spending by Category</h3>
+        </div>
+        <canvas id="categoryChart"></canvas>
+    </div>
+    
+    <!-- Monthly Trend Chart -->
+    <div class="card">
+        <div class="card-header">
+            <h3 class="card-title">📈 Spending Trend</h3>
+        </div>
+        <canvas id="trendChart"></canvas>
+    </div>
+</div>
+
+<!-- Budget vs Actual Chart -->
+<div class="card" id="budgetComparisonCard" style="display: none;">
+    <div class="card-header">
+        <h3 class="card-title">🎯 Budget vs Actual Spending</h3>
+    </div>
+    <canvas id="budgetComparisonChart"></canvas>
+</div>
+
+<!-- Budget Recommendation Card -->
+<div class="card" id="latestBudgetCard" style="display: none;">
+    <div class="card-header">
+        <h2 class="card-title">💼 Latest Budget Recommendation</h2>
+        <button onclick="generateNewBudget()" class="btn btn-primary">Generate New Budget</button>
+    </div>
+    <div id="budgetContent"></div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="/static/js/dashboard.js?v=5"></script>
+{% endblock %}
+

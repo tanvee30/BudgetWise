@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}BudgetWise{% endblock %}</title>
+    <link rel="stylesheet" href="/static/css/style.css?v=5">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+</head>
+<body>
+    {% if user.is_authenticated %}
+    <nav class="navbar">
+        <div class="nav-container">
+            <a href="/" class="nav-brand">💰 BudgetWise</a>
+            <ul class="nav-links">
+                <li><a href="/dashboard/">Dashboard</a></li>
+                <li><a href="/transactions/">Transactions</a></li>
+                <li><a href="/budget/">Budget</a></li>
+                <li>
+                    <a href="/profile/" style="display: inline-flex; align-items: center; gap: 0.5rem;">
+                        <span style="width: 32px; height: 32px; background: linear-gradient(135deg, #667eea, #764ba2); border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; font-weight: 600; font-size: 0.875rem;">
+                            {{ user.username.0|upper }}
+                        </span>
+                        {{ user.username }}
+                    </a>
+                </li>
+                <li><a href="/logout/" class="btn btn-secondary" style="padding: 0.5rem 1rem;">Logout</a></li>
+            </ul>
+        </div>
+    </nav>
+    {% endif %}
+
+    <div class="container">
+        {% block content %}{% endblock %}
+    </div>
+
+    <!-- Custom Modal -->
+    <div id="customModal" class="custom-modal-overlay">
+        <div id="customModalContent" class="custom-modal">
+            <div class="modal-icon" id="modalIcon"></div>
+            <h3 class="modal-title" id="modalTitle"></h3>
+            <p class="modal-message" id="modalMessage"></p>
+            <div class="modal-buttons" id="modalButtons"></div>
+        </div>
+    </div>
+
+    <script>
+        function showSuccessModal(message, onClose) {
+            const modal = document.getElementById('customModal');
+            const content = document.getElementById('customModalContent');
+            const icon = document.getElementById('modalIcon');
+            const title = document.getElementById('modalTitle');
+            const msg = document.getElementById('modalMessage');
+            const buttons = document.getElementById('modalButtons');
+            
+            content.className = 'custom-modal success';
+            icon.innerHTML = '<svg viewBox="0 0 52 52"><path class="checkmark" d="M14 27l8 8 16-16"/></svg>';
+            title.textContent = 'Success!';
+            msg.textContent = message;
+            buttons.innerHTML = '<button class="btn btn-success" onclick="closeModal()">OK</button>';
+            
+            modal.classList.add('active');
+            
+            if (onClose) {
+                window.modalCallback = onClose;
+            }
+        }
+
+        function showErrorModal(message) {
+            const modal = document.getElementById('customModal');
+            const content = document.getElementById('customModalContent');
+            const icon = document.getElementById('modalIcon');
+            const title = document.getElementById('modalTitle');
+            const msg = document.getElementById('modalMessage');
+            const buttons = document.getElementById('modalButtons');
+            
+            content.className = 'custom-modal error';
+            icon.textContent = '✕';
+            title.textContent = 'Error';
+            msg.textContent = message;
+            buttons.innerHTML = '<button class="btn btn-secondary" onclick="closeModal()">OK</button>';
+            
+            modal.classList.add('active');
+        }
+
+        function showConfirmModal(message, onConfirm, onCancel) {
+            const modal = document.getElementById('customModal');
+            const content = document.getElementById('customModalContent');
+            const icon = document.getElementById('modalIcon');
+            const title = document.getElementById('modalTitle');
+            const msg = document.getElementById('modalMessage');
+            const buttons = document.getElementById('modalButtons');
+            
+            content.className = 'custom-modal confirm';
+            icon.textContent = '?';
+            title.textContent = 'Confirm Action';
+            msg.textContent = message;
+            buttons.innerHTML = `
+                <button class="btn btn-secondary" onclick="handleModalCancel()">Cancel</button>
+                <button class="btn btn-primary" onclick="handleModalConfirm()">OK</button>
+            `;
+            
+            modal.classList.add('active');
+            
+            window.modalConfirmCallback = onConfirm;
+            window.modalCancelCallback = onCancel;
+        }
+
+        function closeModal() {
+            const modal = document.getElementById('customModal');
+            modal.classList.remove('active');
+            
+            if (window.modalCallback) {
+                window.modalCallback();
+                window.modalCallback = null;
+            }
+        }
+
+        function handleModalConfirm() {
+            closeModal();
+            if (window.modalConfirmCallback) {
+                window.modalConfirmCallback();
+                window.modalConfirmCallback = null;
+            }
+        }
+
+        function handleModalCancel() {
+            closeModal();
+            if (window.modalCancelCallback) {
+                window.modalCancelCallback();
+                window.modalCancelCallback = null;
+            }
+        }
+
+        document.getElementById('customModal').addEventListener('click', function(e) {
+            if (e.target === this) {
+                closeModal();
+            }
+        });
+    </script>
+
+    {% block scripts %}{% endblock %}
+</body>
+</html>

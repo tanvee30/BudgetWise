@@ -1,0 +1,28 @@
+{% extends 'base.html' %}
+
+{% block title %}Budget - BudgetWise{% endblock %}
+
+{% block content %}
+<h1 style="margin-bottom: 2rem;">💼 Budget Recommendations</h1>
+
+<div class="card" id="budgetCard">
+    <div class="card-header no-print">
+        <h2 class="card-title">Current Month Budget</h2>
+        <div style="display: flex; gap: 1rem;">
+            <button onclick="exportBudgetPDF()" class="btn btn-secondary">📄 Export PDF</button>
+            <button onclick="generateBudget()" class="btn btn-primary">Generate New Budget</button>
+        </div>
+    </div>
+    
+    <div id="budgetContent">
+        <div class="loading">
+            <div class="spinner"></div>
+            <p>Loading budget...</p>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="/static/js/budget.js?v=8"></script>
+{% endblock %}
