@@ -238,3 +238,20 @@ class BudgetRecommendationViewSet(viewsets.ReadOnlyModelViewSet):
             'count': len(summary),
             'budgets': summary
         })
+    
+@action(detail=False, methods=['get'])
+def adherence(self, request):
+    """Get budget adherence score and insights"""
+    if not request.user.is_authenticated:
+        return Response({'error': 'Authentication required'}, status=401)
+    
+    from .services import calculate_budget_adherence
+    
+    adherence_data = calculate_budget_adherence(request.user)
+    
+    if not adherence_data:
+        return Response({
+            'message': 'No active budget found for current month'
+        }, status=404)
+    
+    return Response(adherence_data)

@@ -479,3 +479,95 @@ class BudgetCalculationService:
             }
         
         return comparison
+    
+def calculate_budget_adherence(user):
+    """
+    Calculate budget adherence score (0-100)
+    Returns insights about user's financial behavior
+    """
+    from datetime import datetime, timedelta
+    
+    # Get current month's budget
+    current_month = datetime.now().date().replace(day=1)
+    try:
+        budget = BudgetRecommendation.objects.get(user=user, month=current_month, is_active=True)
+    except BudgetRecommendation.DoesNotExist:
+        return None
+    
+    # Get current month's transactions
+    month_start = current_month
+    if current_month.month == 12:
+        month_end = current_month.replace(year=current_month.year + 1, month=1, day=1) - timedelta(days=1)
+    else:
+        month_end = current_month.replace(month=current_month.month + 1, day=1) - timedelta(days=1)
+    
+    transactions = Transaction.objects.filter(
+        user=user,
+        date__gte=month_start,
+        date__lte=month_end,
+        is_anomaly=False
+    )
+    
+    # Calculate spending by category
+    actual_spending = {}
+    for t in transactions:
+        actual_spending[t.category] = actual_spending.get(t.category, Decimal('0')) + t.amount
+    
+    # Calculate adherence per category
+    adherence_scores = []
+    insights = []
+    
+    for cat_budget in budget.category_budgets.all():
+        actual = actual_spending.get(cat_budget.category, Decimal('0'))
+        recommended = cat_budget.recommended_limit
+        
+        if recommended > 0:
+            percentage_used = (actual / recommended * 100)
+            
+            if percentage_used <= 90:
+                score = 100
+                insights.append({
+                    'category': cat_budget.category,
+                    'type': 'success',
+                    'message': f"Great job on {cat_budget.get_category_display()}! You're {100 - percentage_used:.0f}% under budget."
+                })
+            elif percentage_used <= 100:
+                score = 80
+                insights.append({
+                    'category': cat_budget.category,
+                    'type': 'warning',
+                    'message': f"{cat_budget.get_category_display()} is at {percentage_used:.0f}% of budget. Watch your spending!"
+                })
+            else:
+                score = max(0, 100 - (percentage_used - 100))
+                insights.append({
+                    'category': cat_budget.category,
+                    'type': 'danger',
+                    'message': f"⚠️ {cat_budget.get_category_display()} is {percentage_used - 100:.0f}% over budget!"
+                })
+            
+            adherence_scores.append(score)
+    
+    # Overall score
+    overall_score = sum(adherence_scores) / len(adherence_scores) if adherence_scores else 0
+    
+    # Generate overall insight
+    if overall_score >= 90:
+        overall_message = "🌟 Excellent! You're doing great with your budget!"
+    elif overall_score >= 70:
+        overall_message = "👍 Good job! Minor improvements needed in some categories."
+    elif overall_score >= 50:
+        overall_message = "⚠️ Be careful! You're overspending in several categories."
+    else:
+        overall_message = "🚨 Alert! Significant overspending detected. Review your budget."
+    
+    return {
+        'score': round(overall_score, 1),
+        'message': overall_message,
+        'category_insights': insights[:3],  # Top 3 insights
+        'total_budgeted': budget.total_recommended_budget,
+        'total_spent': sum(actual_spending.values()),
+        'on_track': overall_score >= 70
+    }
+    
+    

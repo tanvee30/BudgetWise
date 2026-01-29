@@ -5,9 +5,43 @@
 {% block content %}
 <h1 style="margin-bottom: 2rem;">💳 Transactions</h1>
 
+<!-- Search & Filter Bar -->
+<div class="card" style="margin-bottom: 1.5rem;">
+    <div style="display: grid; grid-template-columns: 1fr 1fr 1fr auto; gap: 1rem; align-items: end;">
+        <div class="form-group" style="margin-bottom: 0;">
+            <label class="form-label">Search</label>
+            <input type="text" id="searchInput" class="form-input" placeholder="Search merchant..." onkeyup="filterTransactions()">
+        </div>
+        <div class="form-group" style="margin-bottom: 0;">
+            <label class="form-label">Category</label>
+            <select id="categoryFilter" class="form-select" onchange="filterTransactions()">
+                <option value="">All Categories</option>
+                <option value="food">Food</option>
+                <option value="transport">Transport</option>
+                <option value="entertainment">Entertainment</option>
+                <option value="shopping">Shopping</option>
+                <option value="bills">Bills & Utilities</option>
+                <option value="rent">Rent</option>
+                <option value="healthcare">Healthcare</option>
+                <option value="other">Other</option>
+            </select>
+        </div>
+        <div class="form-group" style="margin-bottom: 0;">
+            <label class="form-label">Month</label>
+            <input type="month" id="monthFilter" class="form-input" onchange="filterTransactions()">
+        </div>
+        <button onclick="clearFilters()" class="btn btn-secondary">Clear</button>
+    </div>
+</div>
+
 <div class="card">
     <div class="card-header">
-        <h2 class="card-title">Recent Transactions</h2>
+        <div>
+            <h2 class="card-title">Recent Transactions</h2>
+            <p style="color: var(--text-secondary); font-size: 0.875rem; margin-top: 0.25rem;">
+                Showing <span id="transactionCount">0</span> transactions
+            </p>
+        </div>
         <button onclick="showAddTransactionModal()" class="btn btn-primary">+ Add Transaction</button>
     </div>
     
@@ -107,5 +141,5 @@
 {% endblock %}
 
 {% block scripts %}
-<script src="/static/js/transactions.js"></script>
+<script src="/static/js/transactions.js?v=6"></script>
 {% endblock %}

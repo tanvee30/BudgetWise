@@ -99,33 +99,94 @@ function displayBudget(budget) {
 }
 
 async function generateBudget() {
-    if (!confirm('Generate a new budget recommendation? This will analyze your recent transactions.')) return;
-    
-    document.getElementById('budgetContent').innerHTML = '<div class="loading"><div class="spinner"></div><p>Generating budget...</p></div>';
-    
-    try {
-        const response = await fetch('/api/budgets/generate/', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'X-CSRFToken': csrftoken
-            },
-            body: JSON.stringify({})
-        });
-        
-        if (response.ok) {
-            const result = await response.json();
-            alert('Budget generated successfully!');
-            displayBudget(result.budget);
-        } else {
-            const error = await response.json();
-            alert('Error: ' + (error.error || 'Failed to generate budget'));
-            loadBudget();
+    showConfirmModal(
+        'Generate a new budget recommendation? This will analyze your recent transactions.',
+        async function() {
+            // User clicked OK
+            document.getElementById('budgetContent').innerHTML = '<div class="loading"><div class="spinner"></div><p>Generating budget...</p></div>';
+            
+            try {
+                const response = await fetch('/api/budgets/generate/', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': csrftoken
+                    },
+                    body: JSON.stringify({})
+                });
+                
+                if (response.ok) {
+                    const result = await response.json();
+                    showSuccessModal('Budget generated successfully!', function() {
+                        displayBudget(result.budget);
+                    });
+                } else {
+                    const error = await response.json();
+                    showErrorModal(error.error || 'Failed to generate budget');
+                    loadBudget();
+                }
+            } catch (error) {
+                showErrorModal('Error: ' + error.message);
+                loadBudget();
+            }
+        },
+        function() {
+            // User clicked Cancel
+            console.log('Cancelled');
         }
-    } catch (error) {
-        alert('Error generating budget: ' + error.message);
-        loadBudget();
-    }
+    );
 }
 
 document.addEventListener('DOMContentLoaded', loadBudget);
+
+function exportBudgetPDF() {
+    // Add print header
+    const budgetContent = document.getElementById('budgetContent');
+    const printDate = new Date().toLocaleDateString('en-IN', { 
+        year: 'numeric', 
+        month: 'long', 
+        day: 'numeric' 
+    });
+    
+    // Add print-only header
+    const printHeader = document.createElement('div');
+    printHeader.className = 'print-header';
+    printHeader.innerHTML = `
+        <h1>💰 BudgetWise</h1>
+        <p>Budget Recommendation Report</p>
+        <p>Generated on ${printDate}</p>
+        <hr style="margin: 1rem 0; border: 1px solid #E5E7EB;">
+    `;
+    
+    budgetContent.insertBefore(printHeader, budgetContent.firstChild);
+    
+    // Set print date attribute
+    document.body.setAttribute('data-print-date', printDate);
+    
+    // Trigger print
+    window.print();
+    
+    // Remove print header after printing
+    setTimeout(() => {
+        printHeader.remove();
+    }, 1000);
+}
+
+function exportBudgetPDF() {
+    const element = document.getElementById('budgetContent');
+    const opt = {
+        margin: 1,
+        filename: `BudgetWise-Budget-${new Date().toISOString().split('T')[0]}.pdf`,
+        image: { type: 'jpeg', quality: 0.98 },
+        html2canvas: { scale: 2 },
+        jsPDF: { unit: 'in', format: 'letter', orientation: 'portrait' }
+    };
+    
+    // Show loading
+    showSuccessModal('Generating PDF... Please wait.', null);
+    
+    // Generate PDF
+    html2pdf().set(opt).from(element).save().then(() => {
+        closeModal();
+    });
+}
