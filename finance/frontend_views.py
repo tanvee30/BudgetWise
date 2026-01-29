@@ -46,3 +46,9 @@ def transactions_page(request):
 def budget_page(request):
     """Budget recommendations page"""
     return render(request, 'budget.html')
+
+
+@login_required(login_url='login')
+def profile_page(request):
+    """User profile page"""
+    return render(request, 'profile.html')

@@ -1,9 +1,11 @@
 from rest_framework import viewsets, status
-from rest_framework.decorators import api_view, permission_classes,action
+from rest_framework.decorators import api_view, permission_classes, action
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated, AllowAny
 from django.shortcuts import get_object_or_404
 from django.contrib.auth import authenticate, login
+from django.views.decorators.csrf import csrf_exempt
+from django.utils.decorators import method_decorator
 from datetime import datetime
 
 from .models import (
@@ -22,6 +24,7 @@ from .services import BudgetCalculationService
 
 @api_view(['POST'])
 @permission_classes([AllowAny])
+@csrf_exempt
 def login_view(request):
     """
     Simple login endpoint for testing
@@ -51,12 +54,13 @@ def login_view(request):
         )
 
 
+@method_decorator(csrf_exempt, name='dispatch')
 class TransactionViewSet(viewsets.ModelViewSet):
     """
     API endpoints for managing transactions
     """
     serializer_class = TransactionSerializer
-    permission_classes = []  # Allow all for now since we're using session auth
+    permission_classes = []
     
     def get_queryset(self):
         """Return transactions for the current user only"""
@@ -96,12 +100,13 @@ class TransactionViewSet(viewsets.ModelViewSet):
         return Response(category_summary)
 
 
+@method_decorator(csrf_exempt, name='dispatch')
 class UserFinancialProfileViewSet(viewsets.ModelViewSet):
     """
     API endpoints for user financial profile
     """
     serializer_class = UserFinancialProfileSerializer
-    permission_classes = []  # Allow all for now
+    permission_classes = []
     
     def get_queryset(self):
         """Return profile for current user only"""
@@ -124,15 +129,30 @@ class UserFinancialProfileViewSet(viewsets.ModelViewSet):
             }
         )
         serializer = self.get_serializer(profile)
-        return Response([serializer.data])  # Return as list for consistency
+        return Response([serializer.data])
+    
+    def update(self, request, *args, **kwargs):
+        """Update user profile"""
+        if not request.user.is_authenticated:
+            return Response({'error': 'Authentication required'}, status=401)
+        
+        instance = self.get_object()
+        
+        if 'monthly_income' in request.data:
+            instance.monthly_income = request.data['monthly_income']
+            instance.save()
+        
+        serializer = self.get_serializer(instance)
+        return Response(serializer.data)
 
 
+@method_decorator(csrf_exempt, name='dispatch')
 class BudgetRecommendationViewSet(viewsets.ReadOnlyModelViewSet):
     """
     API endpoints for budget recommendations
     """
     serializer_class = BudgetRecommendationSerializer
-    permission_classes = []  # Allow all for now
+    permission_classes = []
     
     def get_queryset(self):
         """Return budget recommendations for current user only"""
@@ -239,19 +259,19 @@ class BudgetRecommendationViewSet(viewsets.ReadOnlyModelViewSet):
             'budgets': summary
         })
     
-@action(detail=False, methods=['get'])
-def adherence(self, request):
-    """Get budget adherence score and insights"""
-    if not request.user.is_authenticated:
-        return Response({'error': 'Authentication required'}, status=401)
-    
-    from .services import calculate_budget_adherence
-    
-    adherence_data = calculate_budget_adherence(request.user)
-    
-    if not adherence_data:
-        return Response({
-            'message': 'No active budget found for current month'
-        }, status=404)
-    
-    return Response(adherence_data)
+    @action(detail=False, methods=['get'])
+    def adherence(self, request):
+        """Get budget adherence score and insights"""
+        if not request.user.is_authenticated:
+            return Response({'error': 'Authentication required'}, status=401)
+        
+        from .services import calculate_budget_adherence
+        
+        adherence_data = calculate_budget_adherence(request.user)
+        
+        if not adherence_data:
+            return Response({
+                'message': 'No active budget found for current month'
+            }, status=404)
+        
+        return Response(adherence_data)

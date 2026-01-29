@@ -4,27 +4,29 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{% block title %}BudgetWise{% endblock %}</title>
-    <link rel="stylesheet" href="/static/css/style.css?v=3">
+    <link rel="stylesheet" href="/static/css/style.css?v=5">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
-
 </head>
 <body>
     {% if user.is_authenticated %}
     <nav class="navbar">
         <div class="nav-container">
-            <a href="{% url 'home' %}" class="nav-brand">💰 BudgetWise</a>
+            <a href="/" class="nav-brand">💰 BudgetWise</a>
             <ul class="nav-links">
-                <li><a href="{% url 'dashboard' %}">Dashboard</a></li>
-                <li><a href="{% url 'transactions' %}">Transactions</a></li>
-                <li><a href="{% url 'budget' %}">Budget</a></li>
+                <li><a href="/dashboard/">Dashboard</a></li>
+                <li><a href="/transactions/">Transactions</a></li>
+                <li><a href="/budget/">Budget</a></li>
                 <li>
-                    <span style="color: var(--text-secondary); margin-right: 1rem;">
-                        👤 {{ user.username }}
-                    </span>
+                    <a href="/profile/" style="display: inline-flex; align-items: center; gap: 0.5rem;">
+                        <span style="width: 32px; height: 32px; background: linear-gradient(135deg, #667eea, #764ba2); border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; font-weight: 600; font-size: 0.875rem;">
+                            {{ user.username.0|upper }}
+                        </span>
+                        {{ user.username }}
+                    </a>
                 </li>
-                <li><a href="{% url 'logout' %}" class="btn btn-secondary" style="padding: 0.5rem 1rem;">Logout</a></li>
+                <li><a href="/logout/" class="btn btn-secondary" style="padding: 0.5rem 1rem;">Logout</a></li>
             </ul>
         </div>
     </nav>
@@ -44,9 +46,7 @@
         </div>
     </div>
 
-    <!-- Global Modal Script -->
     <script>
-        // Custom Modal Functions
         function showSuccessModal(message, onClose) {
             const modal = document.getElementById('customModal');
             const content = document.getElementById('customModalContent');
@@ -134,7 +134,6 @@
             }
         }
 
-        // Close modal when clicking overlay
         document.getElementById('customModal').addEventListener('click', function(e) {
             if (e.target === this) {
                 closeModal();
