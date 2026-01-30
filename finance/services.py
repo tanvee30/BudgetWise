@@ -411,22 +411,32 @@ def calculate_budget_adherence(user):
         if percentage_used <= 90:
             score = 100
             insight_type = 'success'
-            message = f"Great job on {cat_budget.get_category_display()}! You're {100-percentage_used:.0f}% under budget."
+            under_amount = 100 - percentage_used
+            message = f"✅ {cat_budget.get_category_display()}:under budget!"
+            
         elif percentage_used <= 100:
             score = 80
             insight_type = 'warning'
-            message = f"{cat_budget.get_category_display()}: {percentage_used:.0f}% used. Stay mindful!"
+            message = f"⚠️ {cat_budget.get_category_display()}:. Stay mindful!"
+            
         else:
-            overage = percentage_used - 100
-            score = max(0, 60 - overage)
+            # FIX: Correct over-budget calculation
+            over_percentage = percentage_used - 100  # This is the OVER amount
+            score = max(0, 60 - over_percentage)
             insight_type = 'danger'
-            message = f"⚠️ {cat_budget.get_category_display()}: {overage:.0f}% over budget!"
+            
+            # Show actual overspend amount
+            over_amount = actual - budgeted
+            message = f"🚨 {cat_budget.get_category_display()}: ₹{over_amount:,.0f} over budget!"
         
         category_scores.append(score)
         category_insights.append({
             'category': cat_budget.get_category_display(),
             'type': insight_type,
-            'message': message
+            'message': message,
+            'budgeted': float(budgeted),
+            'actual': float(actual),
+            'percentage': float(percentage_used)
         })
     
     # Overall score
@@ -449,11 +459,21 @@ def calculate_budget_adherence(user):
     result = {
         'score': round(overall_score, 1),
         'message': message,
-        'category_insights': sorted(category_insights, key=lambda x: ['danger', 'warning', 'success'].index(x['type']))[:3],
+        'category_insights': sorted(
+            category_insights, 
+            key=lambda x: ['danger', 'warning', 'success'].index(x['type'])
+        )[:3],  # Top 3 most critical
         'total_budgeted': total_budgeted,
         'total_spent': total_spent,
         'on_track': overall_score >= 70
     }
+    
+    # Cache for 10 minutes
+    cache.set(cache_key, result, 600)
+    logger.info(f"💾 Cached adherence for {cache_key}")
+    
+    return result
+
     
     # Cache for 10 minutes (shorter because it changes frequently)
     cache.set(cache_key, result, 600)
