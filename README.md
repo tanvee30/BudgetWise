@@ -423,16 +423,16 @@ Output:
 
 What Was NOT Required But We Added:
 
-| Feature                   |Impact |                      Why It Matters |
 
-| Interactive Charts        | High   |          Visual data is easier to understand than numbers |
-| Budget Adherence Score    | High   |          Gamifies budgeting, encourages good behavior |
-| Search & Filter           | Medium |          Essential for managing many transactions |
-| Custom Modals             | Medium |          Professional UX, better than browser alerts |
-| PDF Export                | Medium |          Enables sharing and record-keeping |
-| Weekly Breakdown          | High   |          Makes monthly budgets more manageable |
-| Responsive Design         | High   |          Mobile users are majority of audience |
-| Real-time Insights        | High   |           Proactive warnings prevent overspending |
+
+1.Interactive Charts     :Visual data is easier to understand than numbers 
+2.Budget Adherence Score :Gamifies budgeting, encourages good behavior 
+3.Search & Filter        :Essential for managing many transactions 
+4.Custom Modals          :Professional UX, better than browser alerts 
+5.PDF Export             :Enables sharing and record-keeping 
+6.Weekly Breakdown       :Makes monthly budgets more manageable 
+7.Responsive Design      :Mobile users are majority of audience 
+8.Real-time Insights     :Proactive warnings prevent overspending 
 
 Technical Innovations:
 
@@ -494,7 +494,7 @@ This project was created as part of a Django Developer assignment.
 
 🙏 Acknowledgments
 
-- Assignment by Team N
+- Assignment by Team Necessive 
 - Chart.js for beautiful visualizations
 - Django & DRF communities for excellent documentation
 - PostgreSQL for robust data storage
